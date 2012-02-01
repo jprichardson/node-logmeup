@@ -1,0 +1,7 @@
+{
+    "_comment": "This is a comment. This file is used for testing.",
+    "host": "127.0.0.1",
+    "port": 7070,
+    "collection": "gitpilotllc",
+    "app": "server"
+}
