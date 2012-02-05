@@ -1,30 +1,35 @@
 request = require('superagent')
 path = require('path')
 fs = require('fs')
+{EventEmitter} = require('events')
 require('string')
 
 exports = module.exports
 
 defaultLogger = null
 
-class Logmeup
+class LogMeUp extends EventEmitter
+  logExists: false
   constructor: (@baseUrl, @collection, @app) ->
 
   create: (callback) ->
     url = "#{@baseUrl}/log/#{@collection}/#{@app}" 
-    request.put(url).end (res) ->
+    request.put(url).end (res) =>
       if res.text.startsWith("Error:") or res.status isnt 200
+        if res.text.contains('exists') then @logExists = true
         callback(new Error(res.text), null)
       else
+        @logExists = true
         callback(null, res.text)
 
 
   delete: (callback) ->
     url = "#{@baseUrl}/log/#{@collection}/#{@app}" 
-    request.del(url).end (res) ->
+    request.del(url).end (res) =>
       if res.text.startsWith("Error:") or res.status isnt 200
         callback(new Error(res.text), null)
       else
+        @logExists = false
         callback(null, res.text)
 
 
@@ -43,15 +48,24 @@ class Logmeup
         newData = data: data
         mime= 'application/x-www-form-urlencoded'
 
-    request.post(url).set('Content-Type',mime).send(newData).end (res) ->
-      if res.text.startsWith("Error:") or res.status isnt 200
-        if callback? then callback(new Error(res.text), null); return;
-      else
-        if callback? then callback(null, res.text)
+    logData = ->
+      request.post(url).set('Content-Type',mime).send(newData).end (res) =>
+        if res.text.startsWith("Error:") or res.status isnt 200
+          #if @logsPending is 0 then emit(Events.logsFlushed)
+          callback?(new Error(res.text), null)
+        else
+          #if @logsPendings is 0 then emit(Events.logsFlushed)
+          callback?(null, res.text)
+    
+    if @logExists
+      logData()
+    else
+      @create -> logData() 
+
 
   @createLogger: (params={}) ->
     baseUrl = "http://#{params.host}:#{params.port}"
-    new Logmeup(baseUrl, params.collection, params.app)
+    new LogMeUp(baseUrl, params.collection, params.app)
 
   @loadDefault: ->
     if defaultLogger? then return defaultLogger
@@ -69,11 +83,10 @@ class Logmeup
       #console.log p
       if path.existsSync(p)
         config = JSON.parse(fs.readFileSync(p))
-        defaultLogger = Logmeup.createLogger(config)
+        defaultLogger = LogMeUp.createLogger(config)
     defaultLogger
 
-Logmeup.loadDefault()
+LogMeUp.loadDefault()
 
-
-exports.Logmeup = Logmeup
+exports.LogMeUp = LogMeUp
 exports.default = defaultLogger

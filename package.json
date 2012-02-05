@@ -21,7 +21,9 @@
     },
     "devDependencies": {
         "coffee-script" : ">=1.0.1", 
-        "mocha": ">=0.10"
+        "mocha": ">=0.10",
+        "testutil": ">=0.0.3"
     }, 
-    "main": "lib/logmeup"
+    "main": "lib/logmeup",
+    "test": "cake test"
 }

@@ -2,7 +2,10 @@
 
 ## About
 
-This is a Node.js REST api wrapper for LogMeUp Server (http://logmeup.com).
+LogMeUp is logger software. The difference between LogMeUp and other logging solutions is that with LogMeUp you can view your log files real-time in the web browser all over the world.
+
+This is a Node.js REST api wrapper for LogMeUp Server (http://logmeup.com). Vist http://logmeup.com to learn about setting it up.
+
 
 ## Install
 
@@ -14,15 +17,58 @@ To create a log file to start logging to, you must create a LogMeUp `collection`
 
 If you're developing an app named 'Slick Server' and you worked for the company 'Crab Shack', you might name your app `slickserver` and your collection `crabshack`.
 
+### Methods/Properties
 
-### Creating Logger
+#### createLogger(params)
+
+Creates an instance of a LogMeUp object. Valid input parameters are:
+
+* host - LogMeUp host
+* port - LogMeUp port, typically 7070
+* collection - The name of your collection
+* app - The name of your app
+* autocreate - (Optional) recommend, Calling the `create()` method isn't needed if this flag is set.
+
+
+#### create(callback)
+
+Creates a log file. Callback parameters:
+
+* error - null if no error
+* body - body text from server, null if error
+
+
+#### delete(callback)
+
+Deletes a log file. Callback parameters:
+
+* error - null if no error
+* body - body text from server, null if error
+
+
+#### logExists
+
+Is always set to **false** after a LogMeUp object is instantiated or created. Once a `create()` is called, it's set to **true**. If `autocreate` is set to **true**, then `create()` is implicitly called and `logExists` will be set to true. Calling `delete()` will set this to **false**.
+
+
+#### log(data,[callback])
+
+Logs data. Data can be a string for an object. Callback isn't necessary, but may be used for troubleshooting. Callback parameters:
+
+* error - null if no error
+* body - body text from server, null if error
+
+
+### Example: Creating Logger
 
 ```javascript
-var Logmeup = require('logmeup');
-var logger = Logmeup.createLogger({host: "mylogmeupserver.com", port: 7070, collection: "crabshack", app: "slickserver"});
+var LogMeUp = require('logmeup').LogMeUp
+var logger = LogMeUp.createLogger({host: "mylogmeupserver.com", port: 7070, collection: "crabshack", app: "slickserver", autocreate: true});
 ```
 
-### Logging Data
+**Note:** Setting `autocreate` to `true` will prevent you from having to call `create()` before you start logging.
+
+### Example: Logging Data
 
 **These methods are asynchronous.**
 
@@ -57,6 +103,7 @@ The configuration file should look like this:
     "port": 7070,
     "collection": "gitpilotllc",
     "app": "server"
+	"autocreate": true
 }
 ```
 
@@ -72,9 +119,9 @@ logger.log("yay!!!");
 
 ## License
 
-MIT License. See [LICENSE](license) for complete details.
+MIT License. See [LICENSE][license] for complete details.
 
-Copyright (c) 2012 JP Richardson [Twitter](twitter) / [Google+](googleplus)
+Copyright (c) 2012 JP Richardson [Twitter][twitter] / [Google+][googleplus]
 
 
 
