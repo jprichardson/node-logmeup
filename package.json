@@ -1,6 +1,6 @@
 {
     "name": "logmeup",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Node.js library to integrate with the LogMeUp server. http://logmeup.com",
     "homepage": [ 
           "https://logmeup.com"
