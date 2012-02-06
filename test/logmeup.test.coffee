@@ -6,7 +6,7 @@ fs = require('fs')
 
 config = 
   port: 7070
-  host: 'yourserver.com'
+  host: 'yourlogmeupserver.com'
   autocreate: false
   collection: 'test'
   app: 'logger'
@@ -107,6 +107,15 @@ describe 'Logmeup', ->
             data = res.body
             T data.records[0].data is logdata
             done()
+
+    it 'should not log data if autocreate is set to false and the log file doesnt exist', (done) ->
+      logdata = "Hello dude!"
+      logger.log logdata, (err,text) -> #this is not typically called with a callback
+        T err isnt null
+        url = "#{logger.baseUrl}/log/#{config.collection}/#{config.app}/data.json"
+        request.get(url).end (res) ->
+          T res.text.contains('Error')
+          done()
 
   describe '+ createLogger', ->
     it 'should create an instance of LogMeUp with input parameters', (done) ->

@@ -1,3 +1,6 @@
+### 0.0.3 / 2012-02-05
+* Fixed bug due to `autocreate`
+
 ### 0.0.2 / 2012-02-04
 * Dropped Makefile for Cakefile
 * Added `npm test` command

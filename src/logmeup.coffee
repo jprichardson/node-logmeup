@@ -10,7 +10,8 @@ defaultLogger = null
 
 class LogMeUp extends EventEmitter
   logExists: false
-  constructor: (@baseUrl, @collection, @app) ->
+  logsPending: 0
+  constructor: (@baseUrl, @collection, @app, @autocreate) ->
 
   create: (callback) ->
     url = "#{@baseUrl}/log/#{@collection}/#{@app}" 
@@ -33,7 +34,7 @@ class LogMeUp extends EventEmitter
         callback(null, res.text)
 
 
-  log: (data, callback) ->
+  log: (data, callback) =>
     url = "#{@baseUrl}/log/#{@collection}/#{@app}"
     newData = null
     mime = ''
@@ -48,24 +49,29 @@ class LogMeUp extends EventEmitter
         newData = data: data
         mime= 'application/x-www-form-urlencoded'
 
-    logData = ->
+    @logsPending += 1
+    #console.log 'LMP: ' + @logsPending
+    logData = =>
       request.post(url).set('Content-Type',mime).send(newData).end (res) =>
+        @logsPending -= 1
         if res.text.startsWith("Error:") or res.status isnt 200
-          #if @logsPending is 0 then emit(Events.logsFlushed)
+          #if @logsPending is 0 then emit('flushed')
           callback?(new Error(res.text), null)
         else
-          #if @logsPendings is 0 then emit(Events.logsFlushed)
+          #if @logsPendings is 0 then emit('flushed')
           callback?(null, res.text)
     
-    if @logExists
+    if !@autocreate or @logExists
       logData()
     else
       @create -> logData() 
 
 
   @createLogger: (params={}) ->
+    autocreate = params.autocreate or= false
+
     baseUrl = "http://#{params.host}:#{params.port}"
-    new LogMeUp(baseUrl, params.collection, params.app)
+    new LogMeUp(baseUrl, params.collection, params.app, autocreate)
 
   @loadDefault: ->
     if defaultLogger? then return defaultLogger
